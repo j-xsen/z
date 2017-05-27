@@ -71,6 +71,8 @@ class Game(Frame):
 		self.rmove = False
 		self.umove = False
 		self.dmove = False
+        
+		self.version = canvas.create_text(725,525,text="demo 1",fill="white")
 		
 		# things to appear in the side menu
 		self.updateCoords()
@@ -199,7 +201,7 @@ class Cell():
 		
 		canvas.pack()
 		
-		# this shouldn't be needed know zombies auto update via zombies.py
+		# this shouldn't be needed now zombies auto update via zombies.py
 		# self.checkCellZombie()
 		
 	def norepCheckCellZombie(self):
@@ -285,12 +287,13 @@ class Cell():
 		
 	def shootGun(self):
 		# check if there are any zombies and if there are, roll to see if it kills
-		if len(self.zs) > 90:
+		if len(self.zs) > 0:
 			roll = randint(1,100)
-			if roll <= 0:
+			if roll >= 10:
 				self.zs = []
 				zombies.killZombie(self.worldcoords)
 				self.clearCellZombie()
+				self.didMiss(False)
 				print("killed zombie @%a!" % (self.worldcoords))
 			else:
 				self.didMiss(True)
@@ -308,11 +311,14 @@ class Cell():
 		self.norepCheckCellZombie()
 		
 	def didMiss(self,which):
-		if which == True:
+		if which:
 			self.canvas.itemconfig(self.missed,text="missed!")
-			self.root.after(500,self.didMiss,False)
 		else:
-			self.canvas.itemconfig(self.missed,text="")
+			self.canvas.itemconfig(self.missed,text="killed!")
+		self.root.after(500,self.fixMiss)
+            
+	def fixMiss(self):
+		self.canvas.itemconfig(self.missed,text="")
 		
 	def updateTxt(self,text):
 		self.text = text
