@@ -3,7 +3,7 @@ from random import randint
 from tkinter import *
 
 import player
-import zombies
+import zombie
 
 
 class Game(Frame):
@@ -71,7 +71,7 @@ class Game(Frame):
         # create zombies
         self.zombies = []
         for x in range(0, 10):
-            z = zombies.Zombie(self, randint(1, 21), randint(1, 21))
+            z = zombie.Zombie(self, randint(1, 21), randint(1, 21))
             self.zombies.append(z)
 
         # version
