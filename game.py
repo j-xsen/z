@@ -79,6 +79,11 @@ class Game(Frame):
 
         # things to appear in the side menu
         self.update_coords()
+        self.xp_holder = canvas.create_rectangle(600, 50, 850, 75, outline="white", fill="black")
+        self.xp_bar = canvas.create_rectangle(602, 52, 603, 73, fill="green")
+        self.xp_label = canvas.create_text(725, 62.5, text="", fill="white")
+        self.xp_level_label = canvas.create_text(725, 85, text=str(self.p.level), fill="white")
+        self.update_xp()
 
     def kpress(self, event):
         if event.keysym == 'Left':
@@ -99,6 +104,13 @@ class Game(Frame):
     def update_coords(self):
         setcoords = "coords: %a" % self.cells[60].worldcoords
         self.canvas.itemconfig(self.coords, text="%s" % setcoords)
+
+    def update_xp(self):
+        maxlength = 848 - 602
+        perctonextlvl = self.p.xp / self.p.get_xp_for_next_level()
+        self.canvas.coords(self.xp_bar, 602, 52, (maxlength * perctonextlvl) + 602, 73)
+        self.canvas.itemconfig(self.xp_label, text=str(self.p.xp) + " / " + str(self.p.get_xp_for_next_level()))
+        self.canvas.itemconfig(self.xp_level_label, text="level: " + str(self.p.level))
 
     # gets cell w/ requested worldcoords
     def get_cell(self, worldcoords):
@@ -190,7 +202,7 @@ class Cell:
         # show grass if no zombies and isn't player
         if not self.game.get_zombie(self.worldcoords) and not self.isplayer:
             # check if in bounds
-            if self.worldcoords[0] < len(self.map[0]) >= 0 and self.worldcoords[1] < len(self.map) >= 0:
+            if len(self.map[0]) > self.worldcoords[0] >= 0 and len(self.map) > self.worldcoords[1] >= 0:
                 idone = self.worldcoords[0]
                 idtwo = self.worldcoords[1]
 

@@ -12,6 +12,7 @@ class Zombie:
         self.ticksincelastmove = 0
 
         self.health = randint(10, 20)
+        self.starthealth = self.health
         self.dead = False
         self.deadtick = 0
 
@@ -64,5 +65,5 @@ class Zombie:
     def damage(self, dmg):
         self.health -= dmg
         if self.health <= 0:
-            print("killed me!")
             self.dead = True
+            self.game.p.add_xp(self.starthealth)
