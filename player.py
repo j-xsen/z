@@ -6,6 +6,9 @@ class Player:
         # move delay
         self.movedelay = 500
 
+        # location
+        self.worldcoords = [0, 0]
+
         # progression
         self.xp = 0
         self.level = 1
@@ -28,47 +31,50 @@ class Player:
     # MOVE FUNCTIONS #
     def move_left(self):
         # make sure block to the left is viable
-        if self.g.cells[59].canstand and self.canmove:
-            for x in range(0, len(self.g.cells)):
-                this = self.g.cells[x]
-                this.worldcoords = [this.worldcoords[0] - 1, this.worldcoords[1]]
-                this.norep_check_cell_zombie()
-            self.canmove = False
-            self.g.update_coords()
-            self.g.parent.after(self.movedelay, self.allow_move)
+        new_coords = [self.worldcoords[0] - 1, self.worldcoords[1]]
+        if self.g.get_coord(new_coords):
+            if self.g.get_coord(new_coords).canstand and self.canmove:
+                self.worldcoords = new_coords
+                self.recenter_cells()
+                self.canmove = False
+                self.g.update_coords()
+                self.g.parent.after(self.movedelay, self.allow_move)
 
     def move_right(self):
         # make sure the block to the right is viable
-        if self.g.cells[61].canstand and self.canmove:
-            for x in range(0, len(self.g.cells)):
-                this = self.g.cells[x]
-                this.worldcoords = [this.worldcoords[0] + 1, this.worldcoords[1]]
-                this.norep_check_cell_zombie()
-            self.canmove = False
-            self.g.update_coords()
-            self.g.parent.after(self.movedelay, self.allow_move)
+        new_coords = [self.worldcoords[0] + 1, self.worldcoords[1]]
+        if self.g.get_coord(new_coords):
+            if self.g.get_coord(new_coords).canstand and self.canmove:
+                self.worldcoords = new_coords
+                self.recenter_cells()
+                self.canmove = False
+                self.g.update_coords()
+                self.g.parent.after(self.movedelay, self.allow_move)
 
     def move_up(self):
         # make sure the block above is viable
-        if self.g.cells[49].canstand and self.canmove:
-            for x in range(0, len(self.g.cells)):
-                this = self.g.cells[x]
-                this.worldcoords = [this.worldcoords[0], this.worldcoords[1] - 1]
-                this.norep_check_cell_zombie()
-            self.canmove = False
-            self.g.update_coords()
-            self.g.parent.after(self.movedelay, self.allow_move)
+        new_coords = [self.worldcoords[0], self.worldcoords[1] - 1]
+        if self.g.get_coord(new_coords):
+            if self.g.get_coord(new_coords).canstand and self.canmove:
+                self.worldcoords = new_coords
+                self.recenter_cells()
+                self.canmove = False
+                self.g.update_coords()
+                self.g.parent.after(self.movedelay, self.allow_move)
 
     def move_down(self):
         # make sure the block below is viable
-        if self.g.cells[71].canstand and self.canmove:
-            for x in range(0, len(self.g.cells)):
-                this = self.g.cells[x]
-                this.worldcoords = [this.worldcoords[0], this.worldcoords[1] + 1]
-                this.norep_check_cell_zombie()
-            self.canmove = False
-            self.g.update_coords()
-            self.g.parent.after(self.movedelay, self.allow_move)
+        new_coords = [self.worldcoords[0], self.worldcoords[1] + 1]
+        if self.g.get_coord(new_coords):
+            if self.g.get_coord(new_coords).canstand and self.canmove:
+                self.worldcoords = new_coords
+                self.recenter_cells()
+                self.canmove = False
+                self.g.update_coords()
+                self.g.parent.after(self.movedelay, self.allow_move)
+
+    def recenter_cells(self):
+        self.g.recenter_cells()
 
     def allow_move(self):
         self.canmove = True

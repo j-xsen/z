@@ -4,6 +4,7 @@ from tkinter import *
 
 import player
 import zombie
+import coord
 
 
 class Game(Frame):
@@ -30,43 +31,28 @@ class Game(Frame):
         canvas.pack(fill=BOTH, expand=1)
         self.canvas = canvas
 
-        # create cells
+        # create cells [for displaying coords]
+        self.canvas_coords = canvas.create_text(725, 20, text="coords:", fill="white")
         self.cells = []
-        self.map = []
-
-        # create map
-        for x in range(0, 22):
-            appen = []
-            for y in range(0, 22):
-                z = randint(1, 3)
-                addtxt = "-"
-                if z == 1:
-                    addtxt = "="
-                elif z == 2:
-                    addtxt = "_"
-                appen.append(addtxt)
-            self.map.append(appen)
-
-        self.coords = canvas.create_text(725, 20, text="coords:", fill="white")
-
-        # create cells
         for x in range(0, 121):
-            row = (math.floor(x / 11))
+            row = (math.floor(x / 11)) # row
             col = (x * 50) - (row * 550)
             colcoord = x - (row * 11)
-            # print("%d//%d" % (col,row))
-
-            # set player
-            if x == 60:
-                c = Cell(col, row * 50, 1, [colcoord, row], self)
-            else:
-                c = Cell(col, row * 50, 0, [colcoord, row], self)
+            rel = [colcoord - 5, row - 5]
+            c = Cell(col, row * 50, rel, self)
 
             self.cells.append(c)
 
+        # create map [hold coords]
+        self.map = []
+        map_max_range = 25
+        for x in range(0, map_max_range):
+            for y in range(0, map_max_range):
+                new_coord = coord.Coord(x, y)
+                self.map.append(new_coord)
+
         # inputs
         self.parent.bind("<Key>", self.kpress)
-        # self.parent.bind("<KeyRelease>",self.kup)
 
         # create zombies
         self.zombies = []
@@ -102,8 +88,13 @@ class Game(Frame):
             this.norep_check_cell_zombie()
 
     def update_coords(self):
-        setcoords = "coords: %a" % self.cells[60].worldcoords
-        self.canvas.itemconfig(self.coords, text="%s" % setcoords)
+        setcoords = "coords: %a" % self.p.worldcoords
+        self.canvas.itemconfig(self.canvas_coords, text="%s" % setcoords)
+
+    # updates all cells
+    def update_cells(self):
+        for cell in self.cells:
+            cell.norep_check_cell_zombie()
 
     def update_xp(self):
         maxlength = 848 - 602
@@ -117,6 +108,13 @@ class Game(Frame):
         for cell in self.cells:
             if cell.worldcoords == worldcoords:
                 return cell
+        return False
+
+    # get coord w/ requested worldcoords
+    def get_coord(self, worldcoords):
+        for coord in self.map:
+            if coord.worldcoords == worldcoords:
+                return coord
         return False
 
     # get zombie w/ requested worldcoords
@@ -135,19 +133,29 @@ class Game(Frame):
         for cell in self.cells:
             cell.norep_check_cell_zombie()
 
+    # check if the player is @ given worldcoords
+    def is_player_here(self, worldcoords):
+        return self.p.worldcoords == worldcoords
+
+    # gets text to display on map
+    def get_map_text(self, worldcoords):
+        if self.get_coord(worldcoords):
+            return self.get_coord(worldcoords).map_text
+        return False
+
+    # recenters all cells
+    def recenter_cells(self):
+        for cell in self.cells:
+            cell.recenter()
+
 
 class Cell:
-    def __init__(self, x, y, isplayer, worldcoords, g):
+    def __init__(self, x, y, worldcoords, g):
         self.canvas = g.canvas
-        self.x = x
-        self.y = y
         self.root = g.parent
+        self.relative = worldcoords
         self.worldcoords = worldcoords
-        self.map = g.map
-
         self.game = g
-
-        self.canstand = True
 
         # gun time
         self.guntime = 0
@@ -163,13 +171,6 @@ class Cell:
         self.gun = canvas.create_text(x + 25, y + 40, text="", fill="white")
         self.missed = canvas.create_text(x + 25, y + 10, text="", fill="white")
 
-        # check whether to set this as a player cell or not
-        if isplayer == 1:
-            self.l.config(text="x")
-            self.isplayer = True
-        else:
-            self.isplayer = False
-
         # create binds
         canvas.tag_bind(self.r, "<ButtonPress-1>", self.click_down)
         canvas.tag_bind(self.r, "<ButtonRelease-1>", self.click_up)
@@ -180,7 +181,7 @@ class Cell:
 
     def norep_check_cell_zombie(self):
         # colors
-        if self.isplayer:
+        if self.game.is_player_here(self.worldcoords):
             self.update_txt("x")
             self.l.config(fg="green")
         else:
@@ -199,18 +200,13 @@ class Cell:
                 self.update_txt("O")
                 self.l.config(fg="red")
 
-        # show grass if no zombies and isn't player
-        if not self.game.get_zombie(self.worldcoords) and not self.isplayer:
-            # check if in bounds
-            if len(self.map[0]) > self.worldcoords[0] >= 0 and len(self.map) > self.worldcoords[1] >= 0:
-                idone = self.worldcoords[0]
-                idtwo = self.worldcoords[1]
-
-                self.update_txt(self.map[idone][idtwo])
-                self.canstand = True
-            else:
-                self.update_txt("")
-                self.canstand = False
+        # show nothing if out of bounds
+        if not self.game.get_coord(self.worldcoords):
+            self.update_txt("")
+        else:
+            # show grass if no zombies and isn't player
+            if not self.game.get_zombie(self.worldcoords) and not self.game.is_player_here(self.worldcoords):
+                self.update_txt(self.game.get_map_text(self.worldcoords))
 
     def click_down(self, event):
         self.gClick = True
@@ -224,7 +220,7 @@ class Cell:
         self.add_gun(self.worldcoords)
 
     def add_gun(self, wc):
-        if self.gClick and not self.isplayer:
+        if self.gClick and not self.game.is_player_here(self.worldcoords):
             # check if it's time to shoot
             if self.guntime == 3 and self.worldcoords == wc:
                 self.shoot_gun()
@@ -287,6 +283,11 @@ class Cell:
     def update_txt(self, text):
         self.l.config(text=text)
         self.canvas.pack()
+
+    def recenter(self):
+        p_wc = self.game.p.worldcoords
+        self.worldcoords = [p_wc[0] + self.relative[0], p_wc[1] + self.relative[1]]
+        self.norep_check_cell_zombie()
 
 
 class M:
