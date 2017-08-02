@@ -41,25 +41,25 @@ class Zombie:
     def north(self):
         goalcell = self.game.get_coord([self.worldcoords[0], self.worldcoords[1] - 1])
         if goalcell:
-            if goalcell.canstand:
+            if goalcell.canstand():
                 self.worldcoords = goalcell.worldcoords
 
     def south(self):
         goalcell = self.game.get_coord([self.worldcoords[0], self.worldcoords[1] + 1])
         if goalcell:
-            if goalcell.canstand:
+            if goalcell.canstand():
                 self.worldcoords = goalcell.worldcoords
 
     def east(self):
         goalcell = self.game.get_coord([self.worldcoords[0] + 1, self.worldcoords[1]])
         if goalcell:
-            if goalcell.canstand:
+            if goalcell.canstand():
                 self.worldcoords = goalcell.worldcoords
 
     def west(self):
         goalcell = self.game.get_coord([self.worldcoords[0] - 1, self.worldcoords[1]])
         if goalcell:
-            if goalcell.canstand:
+            if goalcell.canstand():
                 self.worldcoords = goalcell.worldcoords
 
     def damage(self, dmg):

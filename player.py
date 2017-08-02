@@ -33,7 +33,7 @@ class Player:
         # make sure block to the left is viable
         new_coords = [self.worldcoords[0] - 1, self.worldcoords[1]]
         if self.g.get_coord(new_coords):
-            if self.g.get_coord(new_coords).canstand and self.canmove:
+            if self.g.get_coord(new_coords).canstand() and self.canmove:
                 self.worldcoords = new_coords
                 self.recenter_cells()
                 self.canmove = False
@@ -44,7 +44,7 @@ class Player:
         # make sure the block to the right is viable
         new_coords = [self.worldcoords[0] + 1, self.worldcoords[1]]
         if self.g.get_coord(new_coords):
-            if self.g.get_coord(new_coords).canstand and self.canmove:
+            if self.g.get_coord(new_coords).canstand() and self.canmove:
                 self.worldcoords = new_coords
                 self.recenter_cells()
                 self.canmove = False
@@ -55,7 +55,7 @@ class Player:
         # make sure the block above is viable
         new_coords = [self.worldcoords[0], self.worldcoords[1] - 1]
         if self.g.get_coord(new_coords):
-            if self.g.get_coord(new_coords).canstand and self.canmove:
+            if self.g.get_coord(new_coords).canstand() and self.canmove:
                 self.worldcoords = new_coords
                 self.recenter_cells()
                 self.canmove = False
@@ -66,7 +66,7 @@ class Player:
         # make sure the block below is viable
         new_coords = [self.worldcoords[0], self.worldcoords[1] + 1]
         if self.g.get_coord(new_coords):
-            if self.g.get_coord(new_coords).canstand and self.canmove:
+            if self.g.get_coord(new_coords).canstand() and self.canmove:
                 self.worldcoords = new_coords
                 self.recenter_cells()
                 self.canmove = False

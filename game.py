@@ -43,12 +43,12 @@ class Game(Frame):
 
             self.cells.append(c)
 
-        # create map [hold coords]
+        # create map [holds coords]
         self.map = []
         map_max_range = 25
         for x in range(0, map_max_range):
             for y in range(0, map_max_range):
-                new_coord = coord.Coord(x, y)
+                new_coord = coord.Coord(x, y, self)
                 self.map.append(new_coord)
 
         # inputs
