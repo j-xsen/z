@@ -25,7 +25,7 @@ class Zombie:
         direction = choice(["n", "ne", "e", "es", "s", "sw", "w", "nw"])
 
         # percentage moving
-        if randint(1, 100) < 75:
+        if randint(1, 100) < 75 and not self.dead:
             if "n" in direction:
                 self.north()
             elif "s" in direction:

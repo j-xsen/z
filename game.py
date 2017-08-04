@@ -188,17 +188,27 @@ class Cell:
             self.l.config(fg="white")
 
         if self.game.get_zombie(self.worldcoords):
-            zombie = self.game.get_zombie(self.worldcoords)
-            if zombie.dead:
-                if zombie.deadtick == 0:
+            if self.game.get_zombie(self.worldcoords).dead:
+                if self.game.get_zombie(self.worldcoords).deadtick == 0:
                     self.update_txt("o")
                     self.l.config(fg="white")
-                    zombie.deadtick = 1
+                    self.game.get_zombie(self.worldcoords).deadtick = 1
                 else:
                     self.game.rm_zombie(self.worldcoords)
             else:
                 self.update_txt("O")
                 self.l.config(fg="red")
+
+        # gun stuff
+        if self.game.get_coord(self.worldcoords):
+            self.canvas.itemconfig(self.missed, text=self.game.get_coord(self.worldcoords).missedtext)
+            self.canvas.itemconfig(self.gun, text=self.game.get_coord(self.worldcoords).guntext)
+            if not self.game.get_coord(self.worldcoords).missedtext == "":
+                self.canvas.itemconfig(self.r, fill="red")
+                self.l.config(background="red")
+            else:
+                self.canvas.itemconfig(self.r, fill="black")
+                self.l.config(background="black")
 
         # show nothing if out of bounds
         if not self.game.get_coord(self.worldcoords):
@@ -210,81 +220,21 @@ class Cell:
 
     def click_down(self, event):
         self.gClick = True
-        self.start_gun()
+        if self.game.get_coord(self.worldcoords):
+            self.game.get_coord(self.worldcoords).start_gun()
 
     def click_up(self, event):
         self.gClick = False
-
-    def start_gun(self):
-        self.guntime = 0
-        self.add_gun(self.worldcoords)
-
-    def add_gun(self, wc):
-        if self.gClick and not self.game.is_player_here(self.worldcoords):
-            # check if it's time to shoot
-            if self.guntime == 3 and self.worldcoords == wc:
-                self.shoot_gun()
-            else:
-                if self.worldcoords == wc:
-                    self.guntime = self.guntime + 1
-
-                    settxt = ""
-                    for x in range(0, self.guntime):
-                        settxt += "."
-                    self.canvas.itemconfig(self.gun, text=settxt)
-
-                    self.root.after(500, self.add_gun, wc)
-                else:
-                    print("moved!")
-                    self.remove_gun()
-        else:
-            self.remove_gun()
-
-    def remove_gun(self):
-        self.guntime = 0
-        self.canvas.itemconfig(self.gun, text="")
-
-    def shoot_gun(self):
-        # check if there are any zombies and if there are, roll to see if it kills
-        if self.game.get_zombie(self.worldcoords):
-            roll = randint(1, 100)
-            if roll >= 10:
-                self.game.get_zombie(self.worldcoords).damage(10)
-                self.did_miss(False)
-            else:
-                self.did_miss(True)
-                self.l.config(fg="black")
-
-        self.norep_check_cell_zombie()
-        self.canvas.itemconfig(self.r, fill="red")
-        self.l.config(background="red")
-        self.remove_gun()
-        self.root.after(500, self.remove_gun_red)
-
-    def remove_gun_red(self):
-        self.canvas.itemconfig(self.r, fill="black")
-        self.l.config(background="black")
-        self.l.config(fg="red")
-        self.norep_check_cell_zombie()
-
-    def did_miss(self, which):
-        if which:
-            self.canvas.itemconfig(self.missed, text="missed!")
-        else:
-            if self.game.get_zombie(self.worldcoords).dead:
-                self.canvas.itemconfig(self.missed, text="killed!")
-            else:
-                self.canvas.itemconfig(self.missed, text="hit!")
-        self.root.after(500, self.fix_miss)
-
-    def fix_miss(self):
-        self.canvas.itemconfig(self.missed, text="")
+        if self.game.get_coord(self.worldcoords):
+            self.game.get_coord(self.worldcoords).end_gun()
 
     def update_txt(self, text):
         self.l.config(text=text)
         self.canvas.pack()
 
     def recenter(self):
+        if self.game.get_coord(self.worldcoords):
+            self.game.get_coord(self.worldcoords).end_gun()
         p_wc = self.game.p.worldcoords
         self.worldcoords = [p_wc[0] + self.relative[0], p_wc[1] + self.relative[1]]
         self.norep_check_cell_zombie()
